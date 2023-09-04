@@ -3,12 +3,20 @@ import logo from './logo.svg';
 import './App.css';
 
 function App() {
+
+  //fetch localhost:3000
+    React.useEffect(() => {
+        fetch('http://localhost:3000')
+        .then(response => response.json())
+        .then(data => console.log(data))
+    });
+
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.tsx</code> and save to reload.
+          Edit
         </p>
         <a
           className="App-link"
