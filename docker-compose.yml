@@ -1,9 +1,15 @@
 version: '3.3' # specify docker-compose version
 
 services:
-  express:
+  server:
     build: ./server # specify the directory of the Dockerfile
     ports:
       - "3000:3000" # we are mapping port 3000 of our local machine to port 3000 of the Docker container
     volumes:
       - ./server:/usr/src/app # specify the directory of the application code
+  client:
+    build: ./client
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./client:/usr/src/app
