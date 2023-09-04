@@ -1,16 +1,24 @@
-FROM node:18-alpine
+ARG NODE_VERSION=18.12.1
 
-# Set environment as development
-ENV NODE_ENV=development
+FROM node:${NODE_VERSION}-alpine
 
-# Set working directory
-WORKDIR /usr/app
+# Use production node environment by default.
+ENV NODE_ENV production
 
-# Copy package.json file to the working directory
-COPY ./package.json ./
 
-# Install dependencies
-RUN npm install
+WORKDIR /usr/src/app
+
+# Download dependencies as a separate step to take advantage of Docker's caching.
+# Leverage a cache mount to /root/.npm to speed up subsequent builds.
+# Leverage a bind mounts to package.json and package-lock.json to avoid having to copy them into
+# into this layer.
+RUN --mount=type=bind,source=package.json,target=package.json \
+    --mount=type=bind,source=package-lock.json,target=package-lock.json \
+    --mount=type=cache,target=/root/.npm \
+    npm ci --omit=dev
+
+# Run the application as a non-root user.
+USER node
 
 # Copy all files from current directory to the working directory
 COPY ./ ./
