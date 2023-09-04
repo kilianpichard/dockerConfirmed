@@ -1,29 +1,27 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import './App.css';
 
 function App() {
 
-  //fetch localhost:3000
-    React.useEffect(() => {
-        fetch('http://localhost:3000')
+    const [message, setMessage] = React.useState('');
+    const SERVER_URL = process.env.REACT_APP_SERVER_URL;
+
+    const fetchMessage = () => {
+        fetch(`${SERVER_URL}/messages/random`)
         .then(response => response.json())
-        .then(data => console.log(data))
-    });
+        .then(data => setMessage(data.message))
+    }
+
+    useEffect(() => {
+        fetchMessage();
+    }, []);
 
   return (
     <div className="App">
       <header className="App-header">
         <p>
-          Edit
+            {message}
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
       </header>
     </div>
   );
