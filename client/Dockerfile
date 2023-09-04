@@ -23,5 +23,8 @@ USER node
 # Copy all files from current directory to the working directory
 COPY ./ ./
 
+# Expose the port that the application listens on.
+EXPOSE 3001
+
 # Run the app
 CMD ["npm", "start"]
