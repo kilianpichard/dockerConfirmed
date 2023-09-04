@@ -1,15 +1,41 @@
 version: '3.3' # specify docker-compose version
 
+networks:
+  server-client:
+    driver: bridge # specify the network driver
+  server-mongo:
+    driver: bridge # specify the network driver
+
+
 services:
   server:
     build: ./server # specify the directory of the Dockerfile
+    networks:
+      - server-client # attach the server to the server-client network
+      - server-mongo # attach the server to the server-mongo network
     ports:
-      - "3000:3000" # we are mapping port 3000 of our local machine to port 3000 of the Docker container
+      - "3000:3000" # we are mapping port 8000 of our local machine to port 3000 of the Docker container
     volumes:
       - ./server:/usr/src/app # specify the directory of the application code
+
+
   client:
-    build: ./client
+    build: ./client # specify the directory of the Dockerfile
+    networks:
+      - server-client # attach the client to the server-client network
     ports:
-      - "3001:3000"
+      - "3001:3000" # we are mapping port 3001 of our local machine to port 3000 of the Docker container
     volumes:
-      - ./client:/usr/src/app
+      - ./client:/usr/src/app # specify the directory of the application code
+
+
+  mongo:
+    image: mongo # specify image to build container from
+    networks:
+      - server-mongo # attach the server to the server-mongo network
+    ports:
+      - "27017:27017" # map port 27017
+    volumes:
+      - ./data:/data/db # specify the directory of the database data
+
+
