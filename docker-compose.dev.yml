@@ -10,6 +10,8 @@ networks:
 services:
   server:
     build: ./server # specify the directory of the Dockerfile
+    environment:
+      - NODE_ENV=development
     env_file:
       - .env # pass environment variables to the client
     networks:
@@ -23,6 +25,8 @@ services:
 
   client:
     build: ./client # specify the directory of the Dockerfile
+    environment:
+      - NODE_ENV=development
     env_file:
       - .env # pass environment variables to the client
     networks:
