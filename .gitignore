@@ -1,2 +1,4 @@
 data
 .idea
+elasticsearch-data
+.DS_Store
