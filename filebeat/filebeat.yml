@@ -1,0 +1,25 @@
+filebeat.inputs:
+- type: container  # Notez que le type est 'container' et non 'log'
+  enabled: true
+  paths:
+    - '/var/lib/docker/containers/*/*.log'
+
+
+processors:
+- add_docker_metadata:
+    host: "unix:///var/run/docker.sock"
+
+- decode_json_fields:
+    fields: ["message"]
+    target: "json"
+    overwrite_keys: true
+
+setup.kibana:
+  host: "localhost:5601"
+  username: "elastic"
+  password: "changeme"
+
+output.logstash:
+  hosts: ["logstash:5044"]
+  indices:
+    - index: "filebeat-%{[agent.version]}-%{+yyyy.MM.dd}"

@@ -1,45 +1,90 @@
-version: '3.3' # specify docker-compose version
+version: '3.3'
 
 networks:
   server-client:
-    driver: bridge # specify the network driver
+    driver: bridge
   server-mongo:
-    driver: bridge # specify the network driver
-
+    driver: bridge
+  elk:
+    driver: bridge
 
 services:
   server:
-    build: ./server # specify the directory of the Dockerfile
+    build: ./server
     env_file:
       - .env.prod
     networks:
-      - server-client # attach the server to the server-client network
-      - server-mongo # attach the server to the server-mongo network
+      - server-client
+      - server-mongo
     ports:
-      - "${SERVER_PORT}:${SERVER_PORT}" # we are mapping port of our local machine to port of the Docker container
+      - "${SERVER_PORT}:${SERVER_PORT}"
     volumes:
-      - ./server:/usr/src/app # specify the directory of the application code
-
+      - ./server:/usr/src/app
+      - ./server/logs:/usr/src/app/logs
 
   client:
-    build: ./client # specify the directory of the Dockerfile
+    build: ./client
     env_file:
       - .env.prod
     networks:
-      - server-client # attach the client to the server-client network
+      - server-client
     ports:
-      - "3001:3000" # we are mapping port 3001 of our local machine to port 3000 of the Docker container
+      - "3001:3000"
     volumes:
-      - ./client:/usr/src/app # specify the directory of the application code
-
+      - ./client:/usr/src/app
 
   mongo:
-    image: mongo # specify image to build container from
+    image: mongo
     networks:
-      - server-mongo # attach the server to the server-mongo network
+      - server-mongo
     ports:
-      - "27017:27017" # map port 27017
+      - "27017:27017"
     volumes:
-      - ./data:/data/db # specify the directory of the database data
+      - ./data:/data/db
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.0
+    networks:
+      - elk
+    ports:
+      - "9200:9200"
+    volumes:
+       - ./elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      - "discovery.type=single-node"
 
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.13.0
+    networks:
+      - elk
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.13.0-arm64
+    networks:
+      - elk
+    ports:
+      - "5601:5601"
+    volumes:
+      - ./kibana-data:/usr/share/kibana/data
+    depends_on:
+      - elasticsearch
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.13.0
+    user: root # Ajouté pour les permissions
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/lib/docker:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+      - logstash
