@@ -10,25 +10,21 @@ networks:
 services:
   server:
     build: ./server # specify the directory of the Dockerfile
-    environment:
-      - NODE_ENV=production
     env_file:
-      - .env.production # pass environment variables to the client
+      - .env.prod
     networks:
       - server-client # attach the server to the server-client network
       - server-mongo # attach the server to the server-mongo network
     ports:
-        - "${SERVER_PORT}:${SERVER_PORT}" # we are mapping port 5000 of our local machine to port 5000 of the Docker container
+      - "${SERVER_PORT}:${SERVER_PORT}" # we are mapping port of our local machine to port of the Docker container
     volumes:
       - ./server:/usr/src/app # specify the directory of the application code
 
 
   client:
     build: ./client # specify the directory of the Dockerfile
-    environment:
-      - NODE_ENV=production
     env_file:
-      - .env.production # pass environment variables to the client
+      - .env.prod
     networks:
       - server-client # attach the client to the server-client network
     ports:

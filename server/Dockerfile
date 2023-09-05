@@ -26,7 +26,7 @@ USER node
 COPY . .
 
 # Expose the port that the application listens on.
-EXPOSE ${PORT}
+EXPOSE ${SERVER_PORT}
 
 # Run the application.
 CMD npm start

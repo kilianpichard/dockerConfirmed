@@ -2,7 +2,7 @@
 
 # Lancer l'environnement de développement
 dev:
-	docker-compose -f docker-compose.dev.yml up -d
+	docker-compose -f docker-compose.dev.yml --env-file .env.dev up -d --force-recreate --build
 
 # Arrêter l'environnement de développement
 dev-stop:
@@ -10,7 +10,7 @@ dev-stop:
 
 # Lancer l'environnement de production
 prod:
-	docker-compose -f docker-compose.prod.yml up -d
+	docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d --force-recreate --build
 
 # Arrêter l'environnement de production
 prod-stop:

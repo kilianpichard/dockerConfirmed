@@ -4,7 +4,7 @@ const port = 3000
 const cors = require('cors')
 const bodyParser = require('body-parser')
 require('dotenv').config()
-const {MONGO_URI,SERVER_PORT} = process.env
+const {MONGO_URI,SERVER_PORT, NODE_ENV} = process.env
 
 console.log('MONGO_URI: ', MONGO_URI)
 
@@ -26,7 +26,7 @@ db.on('connected', () => {
 });
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send(`Hello World! You are in ${NODE_ENV} env`)
 })
 
 const messageRouter = require('./routes/message.route')

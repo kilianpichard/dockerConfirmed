@@ -5,12 +5,12 @@ function App() {
 
     const [message, setMessage] = React.useState('');
     const SERVER_URL = process.env.REACT_APP_SERVER_URL;
-    const {NODE_ENV} = process.env;
 
     const fetchMessage = () => {
         fetch(`${SERVER_URL}/messages/random`)
         .then(response => response.json())
         .then(data => setMessage(data.message))
+        .catch(error => setMessage(error.message));
     }
 
     useEffect(() => {
@@ -23,10 +23,9 @@ function App() {
         <p>
             {message}
         </p>
-        <p>
-            You are running this application in <b>{NODE_ENV}</b> mode.
         <br />
-            The backend API URL is: <b>{SERVER_URL}</b>
+          <p>
+              The backend API URL is: <a href={SERVER_URL} target="_blank"><b>{SERVER_URL}</b></a>
         </p>
       </header>
     </div>
