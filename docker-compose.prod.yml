@@ -89,6 +89,7 @@ services:
   filebeat:
     container_name: filebeat
     image: docker.elastic.co/beats/filebeat:7.13.0
+    user: root
     volumes:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - /var/lib/docker:/var/lib/docker:ro
