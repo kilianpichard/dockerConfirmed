@@ -1,8 +1,7 @@
-filebeat.inputs:
-- type: container  # Notez que le type est 'container' et non 'log'
-  enabled: true
-  paths:
-    - '/var/lib/docker/containers/*/*.log'
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
 
 
 processors:
@@ -17,7 +16,7 @@ processors:
 setup.kibana:
   host: "localhost:5601"
   username: "elastic"
-  password: "changeme"
+  password: ${ELASTIC_PASSWORD}
 
 output.logstash:
   hosts: ["logstash:5044"]
