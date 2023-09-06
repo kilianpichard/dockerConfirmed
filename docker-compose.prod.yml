@@ -1,8 +1,6 @@
 version: '3.3'
 
 networks:
-  server-client:
-    driver: bridge
   server-mongo:
     driver: bridge
   elk:
@@ -15,7 +13,6 @@ services:
     env_file:
       - .env.prod
     networks:
-      - server-client
       - server-mongo
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
@@ -32,8 +29,6 @@ services:
             - REACT_APP_SERVER_URL=${REACT_APP_SERVER_URL}
     env_file:
       - .env.prod
-    networks:
-      - server-client
     ports:
       - "80:80"
     volumes:

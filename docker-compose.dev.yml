@@ -1,19 +1,19 @@
 version: '3.3' # specify docker-compose version
 
 networks:
-  server-client:
-    driver: bridge # specify the network driver
   server-mongo:
+    driver: bridge # specify the network driver
+  elk:
     driver: bridge # specify the network driver
 
 
 services:
   server:
+    container_name: server_dev # name of the container
     build: ./server # specify the directory of the Dockerfile
     env_file:
       - .env.dev
     networks:
-      - server-client # attach the server to the server-client network
       - server-mongo # attach the server to the server-mongo network
     ports:
         - "${SERVER_PORT}:${SERVER_PORT}" # we are mapping port of our local machine to port of the Docker container
@@ -22,13 +22,12 @@ services:
 
 
   client:
+    container_name: client_dev # name of the container
     build:
         context: ./client # specify the directory of the Dockerfile
         target: development
     env_file:
       - .env.dev
-    networks:
-      - server-client # attach the client to the server-client network
     ports:
       - "3001:3000" # we are mapping port 3001 of our local machine to port 3000 of the Docker container
     volumes:
@@ -36,6 +35,7 @@ services:
 
 
   mongo:
+    container_name: mongo_dev # name of the container
     image: mongo # specify image to build container from
     networks:
       - server-mongo # attach the server to the server-mongo network
@@ -45,3 +45,53 @@ services:
       - ./data:/data/db # specify the directory of the database data
 
 
+  elasticsearch:
+    container_name: elasticsearch_dev # name of the container
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.0
+    networks:
+      - elk
+    ports:
+      - "9200:9200"
+    volumes:
+       - ./elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      - "discovery.type=single-node"
+
+  logstash:
+    container_name: logstash_dev # name of the container
+    image: docker.elastic.co/logstash/logstash:7.13.0
+    networks:
+      - elk
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    container_name: kibana_dev # name of the container
+    image: docker.elastic.co/kibana/kibana:7.13.0-arm64
+    networks:
+      - elk
+    ports:
+      - "5601:5601"
+    volumes:
+      - ./kibana-data:/usr/share/kibana/data
+    depends_on:
+      - elasticsearch
+
+  filebeat:
+    container_name: filebeat_dev
+    image: docker.elastic.co/beats/filebeat:7.13.0
+    user: root
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/lib/docker:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+      - logstash
