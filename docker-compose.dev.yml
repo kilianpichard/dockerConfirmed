@@ -22,7 +22,9 @@ services:
 
 
   client:
-    build: ./client # specify the directory of the Dockerfile
+    build:
+        context: ./client # specify the directory of the Dockerfile
+        target: development
     env_file:
       - .env.dev
     networks:

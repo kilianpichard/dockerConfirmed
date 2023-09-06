@@ -15,7 +15,10 @@ app.use(morgan(":method :url :status :res[content-length] - :response-time ms", 
 
 app.use(cors(
     {
-        origin: 'http://localhost:3001',
+        origins: [
+            'http://localhost:3000',
+            'http://localhost:80',
+        ]
     }
 ))
 
