@@ -3,6 +3,8 @@ version: '3.3'
 networks:
   server-mongo:
     driver: bridge
+  server-client:
+    driver: bridge
   elk:
     driver: bridge
 
@@ -14,11 +16,14 @@ services:
       - .env.prod
     networks:
       - server-mongo
+      - server-client
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     volumes:
       - ./server:/usr/src/app
       - ./server/logs:/usr/src/app/logs
+    depends_on:
+      - mongo
 
   client:
     container_name: client
@@ -29,6 +34,8 @@ services:
             - REACT_APP_SERVER_URL=${REACT_APP_SERVER_URL}
     env_file:
       - .env.prod
+    networks:
+        - server-client
     ports:
       - "80:80"
     volumes:
@@ -46,7 +53,7 @@ services:
 
   elasticsearch:
     container_name: elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.1
+    image: elasticsearch:8.9.1
     networks:
       - elk
     ports:
@@ -58,7 +65,7 @@ services:
 
   kibana:
     container_name: kibana
-    image: docker.elastic.co/kibana/kibana:8.9.1
+    image: kibana:8.9.1
     environment:
         ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
         KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD}
@@ -72,7 +79,7 @@ services:
 
   logstash:
     container_name: logstash
-    image: docker.elastic.co/logstash/logstash:8.9.1
+    image: logstash:8.9.1
     environment:
         ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
     networks:
@@ -94,7 +101,7 @@ services:
     volumes:
       - ./elk/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - /var/lib/docker:/var/lib/docker:ro
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - elk
     depends_on:

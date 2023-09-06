@@ -3,6 +3,8 @@ version: '3.3' # specify docker-compose version
 networks:
   server-mongo:
     driver: bridge # specify the network driver
+  server-client:
+    driver: bridge # specify the network driver
   elk:
     driver: bridge # specify the network driver
 
@@ -15,10 +17,13 @@ services:
       - .env.dev
     networks:
       - server-mongo # attach the server to the server-mongo network
+      - server-client # attach the server to the server-client network
     ports:
         - "${SERVER_PORT}:${SERVER_PORT}" # we are mapping port of our local machine to port of the Docker container
     volumes:
       - ./server:/usr/src/app # specify the directory of the application code
+    depends_on:
+      - mongo
 
 
   client:
@@ -26,6 +31,8 @@ services:
     build:
         context: ./client # specify the directory of the Dockerfile
         target: development
+    networks:
+      - server-client # attach the client to the server-client network
     env_file:
       - .env.dev
     ports:
@@ -46,8 +53,8 @@ services:
 
 
   elasticsearch:
-    container_name: elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.1
+    container_name: elasticsearch_dev
+    image: elasticsearch:8.9.1
     networks:
       - elk
     ports:
@@ -58,8 +65,8 @@ services:
         - "discovery.type=single-node"
 
   kibana:
-    container_name: kibana
-    image: docker.elastic.co/kibana/kibana:8.9.1
+    container_name: kibana_dev
+    image: kibana:8.9.1
     environment:
         ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
         KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD}
@@ -72,8 +79,8 @@ services:
       - ./elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
 
   logstash:
-    container_name: logstash
-    image: docker.elastic.co/logstash/logstash:8.9.1
+    container_name: logstash_dev
+    image: logstash:8.9.1
     environment:
         ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
     networks:
@@ -87,7 +94,7 @@ services:
       - elasticsearch
 
   filebeat:
-    container_name: filebeat
+    container_name: filebeat_dev
     image: docker.elastic.co/beats/filebeat:8.9.1
     user: root
     environment:
@@ -95,12 +102,10 @@ services:
     volumes:
       - ./elk/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - /var/lib/docker:/var/lib/docker:ro
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - elk
     depends_on:
       - elasticsearch
       - logstash
-
-
 

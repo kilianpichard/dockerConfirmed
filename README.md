@@ -57,7 +57,7 @@ Environment file for development settings.
 Example:
 
 ```env
-NODE_ENV=production
+NODE_ENV=development
 MONGO_URI=mongodb://mongo:27017/docker-confirmed
 SERVER_PORT=8000
 REACT_APP_SERVER_URL=http://localhost:${SERVER_PORT}
