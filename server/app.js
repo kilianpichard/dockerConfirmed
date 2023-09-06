@@ -11,7 +11,7 @@ const morgan = require("morgan");
 const logger = require("./logger");
 
 
-app.use(morgan("combined", { stream: logger.stream }));
+app.use(morgan(":method :url :status :res[content-length] - :response-time ms", { stream: logger.stream }));
 
 app.use(cors(
     {
