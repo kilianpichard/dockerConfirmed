@@ -13,6 +13,19 @@ processors:
     target: "json"
     overwrite_keys: true
 
+- script:
+    lang: javascript
+    source: >
+      function process(event) {
+        var jsonMessage = event.Get("json.message");
+        var jsonMsg = event.Get("json.msg");
+        if (jsonMsg != null) {
+          event.Put("message", jsonMsg);
+        } else if (jsonMessage != null) {
+          event.Put("message", jsonMessage);
+        }
+      }
+
 setup.kibana:
   host: "localhost:5601"
   username: "elastic"
